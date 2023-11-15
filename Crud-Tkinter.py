@@ -33,7 +33,7 @@ def interface():
     janela.geometry('400x300')
     janela.title("Crud")
 
-    tela_inicio(janela)
+    tela_login(janela)
 
     janela.mainloop()
 
@@ -139,26 +139,59 @@ def tela_incluir(janela):
     incluir.grid(row=4, column=0, padx=10, pady=10)
 
 
-def tela_ler(janela):
+def informacoes_aluno(janela, nome):
     # função usada para excluir o menu principal e ir para a tela de leitura de dados
     excluir_tela_anterior(janela)
 
     # 'linhas' recebe o retorno de "lerDados()" que retorna todas as linhas do banco de dados
-    linhas = ler_dados()
+    linhas = ler_dados(nome)
 
     # Imprimindo as linhas
-    for i, row in enumerate(linhas):
-        nome = tk.Label(janela, text="nome: " + str(row[0]))
-        nome.grid(row=i, column=0, padx=3, pady=3)
-        altura = tk.Label(janela, text="altura: " + str(row[1]))
-        altura.grid(row=i, column=1, padx=3, pady=3)
-        peso = tk.Label(janela, text="Peso: " + str(row[2]))
-        peso.grid(row=i, column=2, padx=3, pady=3)
-        telefone = tk.Label(janela, text="Telefone: " + str(row[3]))
-        telefone.grid(row=i, column=3, padx=3, pady=3)
+    if linhas:
+        nome = tk.Label(janela, text="nome: " + str(linhas[0]))
+        nome.grid(row=0, column=0, padx=3, pady=3)
 
-    botao_voltar = tk.Button(janela, text="VOLTAR", command=lambda: excluir_e_voltar_inicio(janela))
-    botao_voltar.grid(padx=3, pady=3)
+        altura = tk.Label(janela, text="altura: " + str(linhas[1]))
+        altura.grid(row=0, column=1, padx=3, pady=3)
+
+        peso = tk.Label(janela, text="Peso: " + str(linhas[2]))
+        peso.grid(row=0, column=2, padx=3, pady=3)
+
+        telefone = tk.Label(janela, text="Telefone: " + str(linhas[3]))
+        telefone.grid(row=0, column=3, padx=3, pady=3)
+    else:
+        vazio = tk.Label(janela, text="Nenhum aluno cadastrado")
+        vazio.grid(row=0,column=0, padx=3, pady=3)
+
+
+def alunos_exibir(janela):
+    excluir_tela_anterior(janela)
+
+    linhas = ler_dados(None)
+
+    nomes = tk.Label(janela, text="Alunos")
+    nomes.grid(row=0, column=0, padx=3, pady=3)
+
+    for i, row in enumerate(linhas):
+        nome = tk.Button(janela, text=str(row[0]), command=lambda nome=row[0]: tela_aluno(janela, nome))
+        nome.grid(row=i, column=0, padx=3, pady=3)
+
+
+def tela_aluno(janela, aluno_escolhido):
+    excluir_tela_anterior(janela)
+
+    nome_escolhido = tk.Label(janela, text=aluno_escolhido)
+    nome_escolhido.grid(row=0, column=0, padx=3, pady=3)
+
+    informacoes = tk.Button(janela, text="Informações do aluno", command=lambda: informacoes_aluno(janela,
+                                                                                                   nome_escolhido))
+    informacoes.grid(row=1, column=0, padx=3, pady=3)
+
+    atualizar = tk.Button(janela, text="Atualizar dados", command=lambda:tela_editar(janela))
+    atualizar.grid(row=2, column=0, padx=3, pady=3)
+
+    excluir = tk.Button(janela, text="Excluir aluno", command=lambda: tela_excluir(janela))
+    excluir.grid(row=3, column=0, padx=3, pady=3)
 
 
 def tela_excluir(janela):
@@ -190,22 +223,38 @@ def tela_excluir(janela):
     botao_voltar.grid(row=1, column=0, padx=0, pady=5)
 
 
-def tela_inicio(janela):
+def tela_inicio(janela, usuario):
+    excluir_tela_anterior(janela)
     # Tela principal onde se encontra o "Incluir, Leitura, Editar e Excluir"
-    bot_incluir = tk.Button(janela, text="Incluir",
-                            command=lambda: tela_incluir(janela))
-    bot_incluir.grid(row=0, column=0, padx=10, pady=10)
+    if usuario == "professor":
+        bot_manter_aluno = tk.Button(janela, text="Manter Aluno", command=lambda: alunos_exibir(janela))
+        bot_manter_aluno.grid(row=0, column=0, padx=3, pady=3)
 
-    bot_ler = tk.Button(janela, text="Leitura",
-                        command=lambda: tela_ler(janela))
-    bot_ler.grid(row=1, column=0, padx=10, pady=10)
+    else:
+        bot_exibir_treino = tk.Button(janela, text="Exibir treino")
+        bot_exibir_treino.grid(row=0, column=0, padx=3, pady=3)
 
-    bot_editar = tk.Button(janela, text="Editar", command=lambda: tela_editar(janela))
-    bot_editar.grid(row=2, column=0, padx=10, pady=10)
 
-    bot_excluir = tk.Button(janela, text="Excluir",
-                            command=lambda: tela_excluir(janela))
-    bot_excluir.grid(row=3, column=0, padx=10, pady=10)
+def tela_login(janela):
+    label_login = tk.Label(janela, text="Login: ")
+    label_login.grid(row=0, column=0, padx=3, pady=3)
+    login = tk.Entry(janela)
+    login.grid(row=0, column=1, padx=3, pady=3)
+
+    label_senha = tk.Label(janela, text="Senha: ")
+    label_senha.grid(row=0, column=2, padx=3, pady=3)
+    senha = tk.Entry(janela)
+    senha.grid(row=0, column=3, padx=3, pady=3)
+
+    botao_login = tk.Button(janela, text="Login", command=lambda: verificar_login(login, senha, janela))
+    botao_login.grid(row=0, column=4, padx=3, pady=3)
+
+
+def verificar_login(login, senha, janela):
+    if login.get() == "professor" and senha.get() == "123":
+        tela_inicio(janela, "professor")
+    elif login.get() == "aluno" and senha.get() == "000":
+        tela_inicio(janela, "aluno")
 
 
 def inserir(nome, altura, peso, telefone):
@@ -219,12 +268,15 @@ def inserir(nome, altura, peso, telefone):
     print("Dados inseridos com sucesso")
 
 
-def ler_dados():
+def ler_dados(nome_escolhido):
     # Função para ler os dados do banco de dados e retornar as linhas
     cursor = connection.cursor()
-    comando = "SELECT * FROM tab_pessoas"
-    cursor.execute(comando)
+    if nome_escolhido is None:
+        comando = "SELECT * FROM tab_pessoas"
+    else:
+        comando = f"SELECT * FROM tab_pessoas WHERE nome = '{nome_escolhido}'"
 
+    cursor.execute(comando)
     linhas = cursor.fetchall()
     return linhas
 
@@ -260,3 +312,19 @@ if __name__ == "__main__":
     interface()
 
 # chamando banco de dados
+"""
+bot_incluir = tk.Button(janela, text="Incluir",
+                                command=lambda: tela_incluir(janela))
+        bot_incluir.grid(row=0, column=0, padx=10, pady=10)
+
+        bot_ler = tk.Button(janela, text="Leitura",
+                            command=lambda: tela_ler(janela))
+        bot_ler.grid(row=1, column=0, padx=10, pady=10)
+
+        bot_editar = tk.Button(janela, text="Editar", command=lambda: tela_editar(janela))
+        bot_editar.grid(row=2, column=0, padx=10, pady=10)
+
+        bot_excluir = tk.Button(janela, text="Excluir",
+                                command=lambda: tela_excluir(janela))
+        bot_excluir.grid(row=3, column=0, padx=10, pady=10)
+"""
