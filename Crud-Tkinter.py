@@ -87,12 +87,21 @@ def alunos_exibir(janela):
     nomes = tk.Label(janela, text="Alunos")
     nomes.grid(row=0, column=0, padx=3, pady=3)
 
-    for i, row in enumerate(linhas):
-        nome = tk.Button(janela, text=str(row[0]), command=lambda nome=row[0]: tela_aluno(janela, nome))
-        nome.grid(row=i, column=0, padx=3, pady=3)
+    if linhas:
+        if hasattr(janela, "aviso"):
+            janela.aviso.destroy()
 
-    novo_aluno = tk.Button(janela, text="Inserir novo aluno", command=lambda: tela_incluir(janela))
-    novo_aluno.grid(row=i+2, column=0, padx=3, pady=3)
+        for i, row in enumerate(linhas):
+            nome = tk.Button(janela, text=str(row[1]), command=lambda id_valor=row[0], nome=row[1]: tela_aluno(janela, nome,
+                                                                                                                id_valor))
+            nome.grid(row=i+1, column=0, padx=3, pady=3)
+        novo_aluno = tk.Button(janela, text="Inserir novo aluno", command=lambda: tela_incluir(janela))
+        novo_aluno.grid(row=i + 2, column=0, padx=3, pady=3)
+    else:
+        janela.aviso = tk.Label(janela, text="Não há alunos")
+        janela.aviso.grid(row=1, column=0, padx=3, pady=3)
+        novo_aluno = tk.Button(janela, text="Inserir novo aluno", command=lambda: tela_incluir(janela))
+        novo_aluno.grid(row=2, column=0, padx=3, pady=3)
 
 
 def tela_incluir(janela):
@@ -115,25 +124,24 @@ def tela_incluir(janela):
     peso = tk.Entry(janela)
     peso.grid(row=2, column=1, padx=0, pady=10)
 
-    label_telefone = tk.Label(janela, text="Telefone")
-    label_telefone.grid(row=3, column=0, padx=0, pady=10)
-    telefone = tk.Entry(janela)
-    telefone.grid(row=3, column=1, padx=0, pady=10)
+    label_senha = tk.Label(janela, text="Senha: ")
+    label_senha.grid(row=3, column=0, padx=0, pady=10)
+    senha = tk.Entry(janela)
+    senha.grid(row=3, column=1, padx=0, pady=10)
 
     def dados_de_inserir():
         # Coletando os dados inseridos nos campos nome, altura, peso e telefone
         nome_valor = nome.get().lower()
         altura_valor = altura.get()
         peso_valor = peso.get()
-        telefone_valor = telefone.get()
-
+        senha_valor = senha.get()
         # Verificando se os campos foram preenchidos, caso não tenham sido, o menu volta para o início
-        if nome_valor == '' or altura_valor == '' or peso_valor == '' or telefone_valor == '':
+        if nome_valor == '' or altura_valor == '' or peso_valor == '' or senha_valor == '':
             print("Campos em branco")
             alunos_exibir(janela)
         else:
             # Inserindo os dados no banco de dados
-            inserir(nome_valor, altura_valor, peso_valor, telefone_valor)
+            inserir(nome_valor, altura_valor, peso_valor, senha_valor)
             alunos_exibir(janela)
 
         # Botão voltar e incluir
@@ -143,28 +151,29 @@ def tela_incluir(janela):
     incluir.grid(row=4, column=0, padx=10, pady=10)
 
 
-def tela_aluno(janela, aluno_escolhido):
+def tela_aluno(janela, aluno_escolhido, id_valor):
     excluir_tela_anterior(janela)
 
     nome_escolhido = tk.Label(janela, text=aluno_escolhido)
     nome_escolhido.grid(row=0, column=0, padx=3, pady=3)
 
-    informacoes = tk.Button(janela, text="Informações do aluno", command=lambda: informacoes_aluno(janela,
-                                                                                                   aluno_escolhido))
+    informacoes = tk.Button(janela, text="Informações do aluno", command=lambda: informacoes_aluno(janela
+                                                                                                   ,aluno_escolhido, id_valor))
     informacoes.grid(row=1, column=0, padx=3, pady=3)
 
-    atualizar = tk.Button(janela, text="Atualizar dados", command=lambda: tela_editar(janela, aluno_escolhido))
+    atualizar = tk.Button(janela, text="Atualizar dados", command=lambda: tela_editar(janela, aluno_escolhido, id_valor))
     atualizar.grid(row=2, column=0, padx=3, pady=3)
 
-    excluir = tk.Button(janela, text="Excluir aluno", command=lambda: tela_excluir(janela, aluno_escolhido))
+    excluir = tk.Button(janela, text="Excluir aluno", command=lambda: tela_excluir(janela, aluno_escolhido, id_valor))
     excluir.grid(row=3, column=0, padx=3, pady=3)
     botao_voltar = tk.Button(janela, text="VOLTAR", command=lambda: alunos_exibir(janela))
     botao_voltar.grid(row=5, column=0, padx=3, pady=3)
-    botao_treino = tk.Button(janela, text="Manter treino", command=lambda: manter_treino(janela, aluno_escolhido))
+    botao_treino = tk.Button(janela, text="Manter treino", command=lambda: manter_treino(janela, aluno_escolhido,
+                                                                                         id_valor))
     botao_treino.grid(row=6, column=0, padx=3, pady=3)
 
 
-def informacoes_aluno(janela, nome):
+def informacoes_aluno(janela, nome, id_valor):
     # função usada para excluir o menu principal e ir para a tela de leitura de dados
     excluir_tela_anterior(janela)
 
@@ -174,26 +183,26 @@ def informacoes_aluno(janela, nome):
     # Imprimindo as linhas
     if linhas:
         linha = linhas[0]
-        nome = tk.Label(janela, text="nome: " + str(linha[0]))
+        nome = tk.Label(janela, text="nome: " + str(linha[1]))
         nome.grid(row=0, column=0, padx=3, pady=3)
 
-        altura = tk.Label(janela, text="altura: " + str(linha[1]))
+        altura = tk.Label(janela, text="altura: " + str(linha[2]))
         altura.grid(row=0, column=1, padx=3, pady=3)
 
-        peso = tk.Label(janela, text="Peso: " + str(linha[2]))
+        peso = tk.Label(janela, text="Peso: " + str(linha[3]))
         peso.grid(row=0, column=2, padx=3, pady=3)
 
-        telefone = tk.Label(janela, text="Telefone: " + str(linha[3]))
+        telefone = tk.Label(janela, text="Telefone: " + str(linha[4]))
         telefone.grid(row=0, column=3, padx=3, pady=3)
     else:
         vazio = tk.Label(janela, text="Nenhum aluno cadastrado")
         vazio.grid(row=0,column=0, padx=3, pady=3)
 
-    voltar = tk.Button(janela, text="Voltar", command=lambda: tela_aluno(janela, nome_aluno))
+    voltar = tk.Button(janela, text="Voltar", command=lambda: tela_aluno(janela, nome_aluno, id_valor))
     voltar.grid(row=1, column=0, padx=3, pady=3)
 
 
-def tela_editar(janela, aluno_escolhido):
+def tela_editar(janela, aluno_escolhido, id_valor):
     # Funcao para excluir a tela principal e ir para o editar
     excluir_tela_anterior(janela)
 
@@ -215,22 +224,22 @@ def tela_editar(janela, aluno_escolhido):
         # Verificando se os campos foram preenchidos, caso não tenham sido, o menu volta para o início
         if aluno_escolhido == '' or valor_alterar == '' or valor_coluna == '':
             print("Campos em branco")
-            tela_aluno(janela, aluno_escolhido)
+            tela_aluno(janela, aluno_escolhido, id_valor)
         else:
             # Editando os dados no banco de dados
             editar(valor_coluna, aluno_escolhido, valor_alterar)
             if valor_coluna == "nome":
-                tela_aluno(janela, valor_alterar)
+                tela_aluno(janela, valor_alterar, id_valor)
             else:
-                tela_aluno(janela, aluno_escolhido  )
+                tela_aluno(janela, aluno_escolhido, id_valor)
 
     botao_editar = tk.Button(janela, text="Editar", command=dados_alterar)
     botao_editar.grid(row=5, column=0)
-    botao_voltar = tk.Button(janela, text="Voltar", command=lambda: tela_aluno(janela, aluno_escolhido))
+    botao_voltar = tk.Button(janela, text="Voltar", command=lambda: tela_aluno(janela, aluno_escolhido, id_valor))
     botao_voltar.grid(row=5, column=1)
 
 
-def tela_excluir(janela, aluno_escolhido):
+def tela_excluir(janela, aluno_escolhido, id_valor):
     # função usada para excluir o menu principal e ir para a tela de excluir
     excluir_tela_anterior(janela)
 
@@ -253,29 +262,124 @@ def tela_excluir(janela, aluno_escolhido):
     botao_excluir = tk.Button(janela, text="EXCLUIR", command=individuo_apagar)
     botao_excluir.grid(row=1, column=1, padx=10, pady=10)
 
-    botao_voltar = tk.Button(janela, text="VOLTAR", command=lambda: tela_aluno(janela, aluno_escolhido))
+    botao_voltar = tk.Button(janela, text="VOLTAR", command=lambda: tela_aluno(janela, aluno_escolhido, id_valor))
     botao_voltar.grid(row=2, column=0, padx=0, pady=5)
 
 
-def manter_treino(janela, aluno_escolhido):
+def manter_treino(janela, aluno_escolhido, id_valor):
     # função usada para excluir o menu principal e ir para a tela de excluir
     excluir_tela_anterior(janela)
 
-    criar_treino = tk.Button(janela, text="Criar treino")
+    criar_treino = tk.Button(janela, text="Criar treino", command=lambda: tela_incluir_treino(janela, aluno_escolhido))
     criar_treino.grid(row=0, column=0, padx=3, pady=3)
 
-    ler_treino = tk.Button(janela, text="Ler treino")
-    ler_treino.grid(row=1, column=0, padx=3, pady=3)
+    exibir_treino = tk.Button(janela, text="Ler treino", command= lambda: ler_treino(janela, aluno_escolhido, id_valor))
+    exibir_treino.grid(row=1, column=0, padx=3, pady=3)
 
-    atualizar_treino = tk.Button(janela,text="Atualizar treino")
-    atualizar_treino.grid(row=2, column=0, padx=3, pady=3)
+    modificar_treino = tk.Button(janela,text="Atualizar treino", command= lambda: atualizar_treino(janela, aluno_escolhido,
+                                                                                                   id_valor))
+    modificar_treino.grid(row=2, column=0, padx=3, pady=3)
 
     excluir_treino = tk.Button(janela, text="Excluir treino")
     excluir_treino.grid(row=3, column=0, padx=3, pady=3)
 
-    botao_voltar = tk.Button(janela, text="Voltar", command=lambda: tela_aluno(janela, aluno_escolhido))
+    botao_voltar = tk.Button(janela, text="Voltar", command=lambda: tela_aluno(janela, aluno_escolhido, id_valor))
     botao_voltar.grid(row=4, column=0, padx=3, pady=3)
 
+
+""" 
+
+ABAIXO O MANTER TREINO
+
+"""
+
+
+def tela_incluir_treino(janela, aluno_escolhido):
+    excluir_tela_anterior(janela)
+
+    linhas = ler_dados(aluno_escolhido)
+    linha = linhas[0]
+    id_valor = linha[0]
+
+    label_nome_exercicio = tk.Label(janela, text="Nome exercicio: ")
+    label_nome_exercicio.grid(row=0, column=0, padx=3, pady=3)
+    exercicio = tk.Entry(janela)
+    exercicio.grid(row=0, column=1, padx=3, pady=3)
+
+    label_peso = tk.Label(janela, text="Peso: ")
+    label_peso.grid(row=1, column=0, padx=3, pady=3)
+    peso = tk.Entry(janela)
+    peso.grid(row=1, column=1, padx=3, pady=3)
+
+    label_repeticoes = tk.Label(janela, text="Repetições: ")
+    label_repeticoes.grid(row=2, column=0, padx=3, pady=3)
+    repeticoes = tk.Entry(janela)
+    repeticoes.grid(row=2, column=1, padx=3, pady=3)
+
+    def recuperar_valores():
+        valor_nome = exercicio.get().lower()
+        valor_peso = peso.get()
+        valor_repeticoes = repeticoes.get().lower()
+
+        if valor_nome == "" or valor_peso == "" or valor_repeticoes == "":
+            if hasattr(janela, "aviso"):
+                janela.aviso.destroy()
+            janela.aviso = tk.Label(janela, text="Algum campo nao foi preenchido")
+            janela.aviso.grid(row=4, column=0, padx=5, pady=5)
+        else:
+            if hasattr(janela, 'aviso'):
+                    janela.aviso.destroy()
+            inserir_treino(valor_nome, valor_peso, valor_repeticoes, id_valor)
+            janela.aviso = tk.Label(janela, text="Inserido com sucesso!")
+            janela.aviso.grid(row=4, column=0, padx=5, pady=5)
+
+    bot_incluir = tk.Button(janela, text="Incluir", command=recuperar_valores)
+    bot_incluir.grid(row=3, column=0, padx=3, pady=3)
+    bot_voltar = tk.Button(janela, text="Voltar", command=lambda: manter_treino(janela, aluno_escolhido, id_valor))
+    bot_voltar.grid(row=3, column=1, padx=3, pady=3)
+
+
+def ler_treino(janela, aluno_escolhido, id_valor):
+    excluir_tela_anterior(janela)
+    linhas = ler_treino_bd(id_valor)
+
+    for i, row in enumerate(linhas):
+        linha = linhas[i]
+        exercicio = tk.Label(janela, text="Exercicio: "+ str(linha[1]))
+        exercicio.grid(row=i, column=0, padx=3, pady=3)
+        peso = tk.Label(janela, text="Peso: "+ str(linha[2]))
+        peso.grid(row=i, column=1, padx=3, pady=3)
+        repeticoes = tk.Label(janela, text="Repetições: "+ str(linha[3]))
+        repeticoes.grid(row=i, column=2, padx=3, pady=3)
+
+    bot_voltar = tk.Button(janela, text="VOLTAR", command=lambda: manter_treino(janela, aluno_escolhido, id_valor))
+    bot_voltar.grid(row=i+2, column=0, padx=3, pady=3)
+
+
+def atualizar_treino(janela, aluno_escolhido, id_valor):
+    excluir_tela_anterior(janela)
+
+    novo_valor = tk.Label(janela, text="Novo valor: ")
+    novo_valor.grid(row=0, column=0, padx=3, pady=3)
+    valor = tk.Entry(janela)
+    valor.grid(row=0, column=1, padx=3, pady=3)
+    coluna_alterar = tk.Label(janela, text="O que deseja alterar\n(Exercicio, peso ou repetições)")
+    coluna_alterar.grid(row=1, column=0, padx=3, pady=3)
+    alterar = tk.Entry(janela)
+    alterar.grid(row=1, column=1, padx=3, pady=3)
+    def recuperar_valor():
+        new_valor = valor.get().lower()
+        alterar_valor = alterar.get().lower()
+        if new_valor == '' or alterar_valor == '':
+            print("hihi esqueceu")
+        else:
+            editar_treino(alterar_valor, new_valor, id_valor)
+            print("alterou")
+
+    bot_editar = tk.Button(janela, text="EDITAR", command=lambda: recuperar_valor())
+    bot_editar.grid(row=2, column=0, padx=3, pady=3)
+    bot_voltar = tk.Button(janela, text="VOLTAR", command=lambda: manter_treino(janela, aluno_escolhido, id_valor))
+    bot_voltar.grid(row=2, column=0, padx=3, pady=3)
 """ 
 
 ABAIXO APENAS COMANDOS PARA CONEXÃO COM O BANCO DE DADOS
@@ -283,21 +387,30 @@ ABAIXO APENAS COMANDOS PARA CONEXÃO COM O BANCO DE DADOS
 """
 
 
-def inserir(nome, altura, peso, telefone):
+def inserir(nome, altura, peso, senha):
     # Função para inserir no banco de dados
     cursor = connection.cursor()
-    comando = "INSERT INTO tab_pessoas (nome, altura, peso, telefone) VALUES (%s, %s, %s, %s)"
-    values = (nome, altura, peso, telefone)
+    comando = "INSERT INTO tab_pessoas (nome, altura, peso, senha) VALUES (%s, %s, %s, %s)"
+    values = (nome, altura, peso, senha)
     cursor.execute(comando, values)
     connection.commit()
     cursor.close()
     print("Dados inseridos com sucesso")
 
 
+def inserir_treino(exercicio, peso, repeticoes, fk_pessoa):
+    cursor = connection.cursor()
+    comando = "INSERT INTO tab_treino (exercicio, peso, repeticoes, fk_pessoa) VALUES (%s, %s, %s, %s)"
+    values = (exercicio, peso, repeticoes, fk_pessoa)
+    cursor.execute(comando, values)
+    connection.commit()
+    cursor.close()
+    print("Treino inserido")
+
+
 def ler_dados(nome_escolhido):
     # Função para ler os dados do banco de dados e retornar as linhas
     cursor = connection.cursor()
-    print(nome_escolhido)
     if nome_escolhido is None:
         comando = "SELECT * FROM tab_pessoas"
     else:
@@ -306,6 +419,14 @@ def ler_dados(nome_escolhido):
     cursor.execute(comando)
     linhas = cursor.fetchall()
     print(linhas)
+    return linhas
+
+
+def ler_treino_bd(id_valor):
+    cursor = connection.cursor()
+    comando = f"SELECT * FROM tab_treino WHERE fk_pessoa = '{id_valor}'"
+    cursor.execute(comando)
+    linhas = cursor.fetchall()
     return linhas
 
 
@@ -333,6 +454,21 @@ def editar(coluna, nome_pessoa, novo_valor):
     connection.commit()
     cursor.close()
     print("Editado com sucesso!")
+
+
+def editar_treino(coluna, novo_valor, id_valor):
+    cursor = connection.cursor()
+
+        # SE FOR STRING
+    if coluna == 'exercicio' or coluna == 'repeticoes':
+        comando = f"UPDATE tab_treino SET {coluna} = {novo_valor} WHERE fk_pessoa = {id_valor}"
+    else:
+        #  SE FOR FLOAT
+        comando = f"UPDATE tab_treino SET {coluna} = '{novo_valor}' WHERE fk_pessoa = {id_valor}"
+
+    cursor.execute(comando)
+    connection.commit()
+    cursor.close()
 
 
 if __name__ == "__main__":
