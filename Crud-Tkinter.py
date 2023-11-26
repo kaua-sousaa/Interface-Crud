@@ -33,8 +33,7 @@ def interface():
     janela.geometry('400x300')
     janela.title("Crud")
 
-    #tela_login(janela)
-    tela_inicio(janela, "professor")
+    tela_login(janela)
 
     janela.mainloop()
 
@@ -44,6 +43,15 @@ def excluir_tela_anterior(janela):
     for widget in janela.winfo_children():
         widget.grid_forget()
 
+
+def get_id(nome, senha):
+    cursor = connection.cursor()
+    comando = 'SELECT id FROM tab_pessoas WHERE nome = %s AND senha = %s'
+    valores = (nome, senha)
+    cursor.execute(comando, valores)
+    resultado = cursor.fetchall()
+    cursor.close()
+    return resultado[0]
 
 def tela_login(janela):
     label_login = tk.Label(janela, text="Login: ")
@@ -61,13 +69,15 @@ def tela_login(janela):
 
 
 def verificar_login(login, senha, janela):
+    id_valor = get_id(login, senha)
+
     if login.get() == "professor" and senha.get() == "123":
-        tela_inicio(janela, "professor")
+        tela_inicio(janela, "professor", id_valor)
     elif login.get() == "aluno" and senha.get() == "000":
-        tela_inicio(janela, "aluno")
+        tela_inicio(janela, "aluno",id_valor)
 
 
-def tela_inicio(janela, usuario):
+def tela_inicio(janela, usuario, id_valor):
     excluir_tela_anterior(janela)
     # Tela principal onde se encontra o "Incluir, Leitura, Editar e Excluir"
     if usuario == "professor":
@@ -75,7 +85,7 @@ def tela_inicio(janela, usuario):
         bot_manter_aluno.grid(row=0, column=0, padx=3, pady=3)
 
     else:
-        bot_exibir_treino = tk.Button(janela, text="Exibir treino")
+        bot_exibir_treino = tk.Button(janela, text="Exibir treino", command=lambda: exibir_treino_aluno(janela, id_valor))
         bot_exibir_treino.grid(row=0, column=0, padx=3, pady=3)
 
 
@@ -212,7 +222,7 @@ def tela_editar(janela, aluno_escolhido, id_valor):
     novo_valor.grid(row=2, column=1)
 
     label_novo_coluna = tk.Label(janela, text="O que deseja alterar\n"
-                                              "(Nome, altura, peso ou telefone): ")
+                                              "(Nome, senha, peso ou altura): ")
     label_novo_coluna.grid(row=3, column=0)
     coluna_alterar = tk.Entry(janela)
     coluna_alterar.grid(row=3, column=1)
@@ -280,7 +290,7 @@ def manter_treino(janela, aluno_escolhido, id_valor):
                                                                                                    id_valor))
     modificar_treino.grid(row=2, column=0, padx=3, pady=3)
 
-    excluir_treino = tk.Button(janela, text="Excluir treino")
+    excluir_treino = tk.Button(janela, text="Excluir treino", command=lambda: tela_excluir_treino(janela,aluno_escolhido, id_valor))
     excluir_treino.grid(row=3, column=0, padx=3, pady=3)
 
     botao_voltar = tk.Button(janela, text="Voltar", command=lambda: tela_aluno(janela, aluno_escolhido, id_valor))
@@ -343,6 +353,12 @@ def ler_treino(janela, aluno_escolhido, id_valor):
     excluir_tela_anterior(janela)
     linhas = ler_treino_bd(id_valor)
 
+    i = leitura_bd_treino(janela, linhas)
+
+    bot_voltar = tk.Button(janela, text="VOLTAR", command=lambda: manter_treino(janela, aluno_escolhido, id_valor))
+    bot_voltar.grid(row=i+2, column=0, padx=3, pady=3)
+
+def leitura_bd_treino(janela, linhas):
     for i, row in enumerate(linhas):
         linha = linhas[i]
         exercicio = tk.Label(janela, text="Exercicio: "+ str(linha[1]))
@@ -352,10 +368,7 @@ def ler_treino(janela, aluno_escolhido, id_valor):
         repeticoes = tk.Label(janela, text="Repetições: "+ str(linha[3]))
         repeticoes.grid(row=i, column=2, padx=3, pady=3)
 
-    bot_voltar = tk.Button(janela, text="VOLTAR", command=lambda: manter_treino(janela, aluno_escolhido, id_valor))
-    bot_voltar.grid(row=i+2, column=0, padx=3, pady=3)
-
-
+        return i
 def atualizar_treino(janela, aluno_escolhido, id_valor):
     excluir_tela_anterior(janela)
 
@@ -363,23 +376,82 @@ def atualizar_treino(janela, aluno_escolhido, id_valor):
     novo_valor.grid(row=0, column=0, padx=3, pady=3)
     valor = tk.Entry(janela)
     valor.grid(row=0, column=1, padx=3, pady=3)
-    coluna_alterar = tk.Label(janela, text="O que deseja alterar\n(Exercicio, peso ou repetições)")
-    coluna_alterar.grid(row=1, column=0, padx=3, pady=3)
+    exercicio_alterar = tk.Label(janela, text="Exercicio a ser alterado: ")
+    exercicio_alterar.grid(row=1, column=0, padx=3, pady=3)
+    exercicio = tk.Entry(janela)
+    exercicio.grid(row=1, column=1, padx=3, pady=3)
+    coluna_alterar = tk.Label(janela, text="O que deseja alterar\n(Exercicio, peso ou repetições): ")
+    coluna_alterar.grid(row=2, column=0, padx=3, pady=3)
     alterar = tk.Entry(janela)
-    alterar.grid(row=1, column=1, padx=3, pady=3)
+    alterar.grid(row=2, column=1, padx=3, pady=3)
+
     def recuperar_valor():
         new_valor = valor.get().lower()
-        alterar_valor = alterar.get().lower()
-        if new_valor == '' or alterar_valor == '':
+        exercicio_valor = exercicio.get().lower()
+        coluna_valor = alterar.get().lower()
+        if new_valor == '' or coluna_valor == '':
             print("hihi esqueceu")
         else:
-            editar_treino(alterar_valor, new_valor, id_valor)
+            editar_treino(coluna_valor, new_valor, id_valor, exercicio_valor)
+            manter_treino(janela, aluno_escolhido, id_valor)
             print("alterou")
 
     bot_editar = tk.Button(janela, text="EDITAR", command=lambda: recuperar_valor())
-    bot_editar.grid(row=2, column=0, padx=3, pady=3)
+    bot_editar.grid(row=3, column=0, padx=3, pady=3)
     bot_voltar = tk.Button(janela, text="VOLTAR", command=lambda: manter_treino(janela, aluno_escolhido, id_valor))
-    bot_voltar.grid(row=2, column=0, padx=3, pady=3)
+    bot_voltar.grid(row=3, column=1, padx=3, pady=3)
+
+
+def tela_excluir_treino(janela, aluno_escolhido, id_valor):
+    excluir_tela_anterior(janela)
+    exercicio_a_excluir = tk.Label(janela, text="Exercicio que deseja excluir: ")
+    exercicio_a_excluir.grid(row=0, column=0, padx=3, pady=3)
+    exercicio = tk.Entry(janela)
+    exercicio.grid(row=0, column=1, padx=3, pady=3)
+
+    def recuperar_valor():
+        excluir_valor = exercicio.get().lower()
+        if excluir_valor == "":
+            print("escreva algo")
+        else:
+            excluir_treino(excluir_valor, id_valor)
+            manter_treino(janela, aluno_escolhido, id_valor)
+
+    bot_excluir = tk.Button(janela, text="Excluir", command=lambda: recuperar_valor())
+    bot_excluir.grid(row=1, column=0, padx=3, pady=3)
+    bot_voltar = tk.Button(janela, text="Voltar", command=lambda: manter_treino(janela, aluno_escolhido, id_valor))
+    bot_voltar.grid(row=1, column=1, padx=3, pady=3)
+
+"""
+ TELA ALUNO ABAIXO
+"""
+
+
+def exibir_treino_aluno(janela, id_valor):
+    excluir_tela_anterior(janela)
+    linhas = ler_treino_bd(id_valor)
+    i = leitura_bd_treino(janela, linhas)
+
+    novo_peso = tk.Label(janela, text="Caso queira alterar a caraga\n entre com o novo peso: ")
+    novo_peso.grid(row=i+1, column=0, padx=3, pady=3)
+    entry_peso = tk.Entry(janela)
+    entry_peso.grid(row=i+2, column=1, padx=3, pady=3)
+    exercicio_alterar = tk.Label(janela, text="Exercicio a ser alterado: ")
+    exercicio_alterar.grid(row=i+3, column=0, padx=3, pady=3)
+    exercicio = tk.Entry(janela)
+    exercicio.grid(row=i+4, column=1, padx=3, pady=3)
+    def recuperar_dados():
+        peso_valor = entry_peso.get()
+        exercicio_valor = exercicio.get().lower()
+
+        if peso_valor == "" or exercicio_valor == "":
+            print("em branco")
+        else:
+            editar_treino('peso',peso_valor, id_valor,exercicio_valor)
+            print("alterado")
+
+    bot_modificar = tk.Button(janela, text="Modificar", command=lambda: recuperar_dados())
+    bot_modificar.grid(row=i+5, column=0, padx=3, pady=3)
 """ 
 
 ABAIXO APENAS COMANDOS PARA CONEXÃO COM O BANCO DE DADOS
@@ -440,33 +512,34 @@ def excluir(nome_excluir):
     print("Dado excluído")
 
 
+def excluir_treino(exercicio, id_valor):
+    cursor = connection.cursor()
+    comando = "DELETE from tab_treino WHERE exercicio = %s AND fk_pessoa = %s"
+    valores = (exercicio, id_valor)
+    cursor.execute(comando, valores)
+    connection.commit()
+    cursor.close()
+    print("excluido")
+
 def editar(coluna, nome_pessoa, novo_valor):
     cursor = connection.cursor()
-    # Se for STRING:
-    if coluna == 'nome' or coluna == 'telefone':
-        comando = f"UPDATE tab_pessoas SET {coluna} = '{novo_valor}' WHERE nome = '{nome_pessoa}'"
-        print("a")
-    else:
-        # Se for float
-        comando = f"UPDATE tab_pessoas SET {coluna} = {novo_valor} WHERE nome = '{nome_pessoa}'"
 
-    cursor.execute(comando)
+    comando = f"UPDATE tab_pessoas SET {coluna} = %s WHERE nome = %s"
+    valores = (novo_valor, nome_pessoa)
+
+    cursor.execute(comando,valores)
     connection.commit()
     cursor.close()
     print("Editado com sucesso!")
 
 
-def editar_treino(coluna, novo_valor, id_valor):
+def editar_treino(coluna, novo_valor, id_valor, exercicio):
     cursor = connection.cursor()
 
-        # SE FOR STRING
-    if coluna == 'exercicio' or coluna == 'repeticoes':
-        comando = f"UPDATE tab_treino SET {coluna} = {novo_valor} WHERE fk_pessoa = {id_valor}"
-    else:
-        #  SE FOR FLOAT
-        comando = f"UPDATE tab_treino SET {coluna} = '{novo_valor}' WHERE fk_pessoa = {id_valor}"
+    comando = f"UPDATE tab_treino SET {coluna} = %s WHERE fk_pessoa = %s AND exercicio = %s"
+    valores = (novo_valor, id_valor, exercicio)
 
-    cursor.execute(comando)
+    cursor.execute(comando, valores)
     connection.commit()
     cursor.close()
 
@@ -476,19 +549,3 @@ if __name__ == "__main__":
     interface()
 
 # chamando banco de dados
-"""
-bot_incluir = tk.Button(janela, text="Incluir",
-                                command=lambda: tela_incluir(janela))
-        bot_incluir.grid(row=0, column=0, padx=10, pady=10)
-
-        bot_ler = tk.Button(janela, text="Leitura",
-                            command=lambda: tela_ler(janela))
-        bot_ler.grid(row=1, column=0, padx=10, pady=10)
-
-        bot_editar = tk.Button(janela, text="Editar", command=lambda: tela_editar(janela))
-        bot_editar.grid(row=2, column=0, padx=10, pady=10)
-
-        bot_excluir = tk.Button(janela, text="Excluir",
-                                command=lambda: tela_excluir(janela))
-        bot_excluir.grid(row=3, column=0, padx=10, pady=10)
-"""
