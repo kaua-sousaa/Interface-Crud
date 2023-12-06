@@ -1,7 +1,8 @@
 """
-Começando um CRUD: INSERIR, LER, EDITAR E EXCLUIR em Python utilizando um banco de dados e interface.
-O CRUD SERÁ DE INFORMAÇÕES DE UMA PESSOA.
-DEVERÁ RECEBER COMO INFORMAÇÃO: NOME, ALTURA, PESO e TELEFONE .
+Sistema de Gerenciamento de Alunos, projetado para um Professor de Educação Física. Este sistema permite ao professor inserir
+novos alunos, ler suas informações, editar seus detalhes e excluir alunos quando necessário. Além disso, para cada aluno, o 
+professor pode criar um plano de treino personalizado. Dentro de cada plano de treino, o professor pode adicionar novos exercícios, 
+editar os detalhes dos exercícios, excluir exercícios e ler os detalhes dos exercícios inseridos.
 """
 
 import tkinter as tk
