@@ -33,7 +33,7 @@ def interface():
     janela = tk.Tk()
     janela.geometry('600x300')
     janela.title("Gestão de alunos")
-    janela.iconbitmap("C:\\Users\kauas\OneDrive\Área de Trabalho\ADS\\favicon.ico")
+    #janela.iconbitmap("C:\\Users\kauas\OneDrive\Área de Trabalho\ADS\\favicon.ico")
     tela_login(janela)
     janela.mainloop()
 
