@@ -39,3 +39,15 @@ Este sistema utiliza um banco de dados MySQL para armazenar informações sobre 
 
 ```bash
 pip install mysql-connector-python
+```
+
+## Funcionamento do Sistema
+### Tela do Professor
+
+https://github.com/kaua-sousaa/Interface-Crud/assets/102885029/5bc51c59-30f4-4310-88c8-504fab201e67
+
+### Tela do Aluno
+
+https://github.com/kaua-sousaa/Interface-Crud/assets/102885029/0078789b-f344-436e-a635-4c757bba1ccb
+
+
